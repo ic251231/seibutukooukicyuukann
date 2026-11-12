@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生物と環境 後期中間試験対策クイズ</title>
+<style>
+  :root {
+    --primary: #2e7d32;
+    --primary-light: #e8f5e9;
+    --primary-dark: #1b5e20;
+    --accent: #0288d1;
+    --correct: #2e7d32;
+    --correct-bg: #c8e6c9;
+    --wrong: #c62828;
+    --wrong-bg: #ffcdd2;
+    --bg: #f4f7f4;
+    --card-bg: #ffffff;
+    --text: #263238;
+    --text-sub: #546e7a;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px 12px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 680px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    padding: 20px 24px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  header p {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 4px;
+  }
+
+  .screen {
+    display: none;
+    padding: 24px;
+  }
+
+  .screen.active {
+    display: block;
+    animation: fadeIn 0.25s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 設定画面 */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 18px;
+    background: var(--primary);
+    border-radius: 3px;
+  }
+
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .select-btn {
+    padding: 14px 12px;
+    border: 2px solid #cfd8dc;
+    background: #fff;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .select-btn span {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--text-sub);
+    margin-top: 4px;
+  }
+
+  .select-btn:hover {
+    border-color: var(--primary);
+    background: #f9fbe7;
+  }
+
+  .select-btn.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+  }
+
+  .start-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+  }
+
+  .start-btn:hover {
+    background: var(--primary-dark);
+  }
+
+  .start-btn:active {
+    transform: scale(0.99);
+  }
+
+  /* クイズ画面（フラッシュカード） */
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: var(--text-sub);
+    font-weight: 600;
+  }
+
+  .badge {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #eceff1;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .flashcard {
+    background: #fafafa;
+    border: 2px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 22px 20px;
+    margin-bottom: 20px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .question-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.65;
+  }
+
+  .choices-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .choice-btn {
+    width: 100%;
+    text-align: left;
+    padding: 14px 16px;
+    background: #fff;
+    border: 2px solid #cfd8dc;
+    border-radius: 10px;
+    font-size: 0.98rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  .choice-num {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #eceff1;
+    color: var(--text-sub);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .choice-btn.correct {
+    background: var(--correct-bg) !important;
+    border-color: var(--correct) !important;
+    color: #1b5e20 !important;
+    font-weight: 700;
+  }
+
+  .choice-btn.correct .choice-num {
+    background: var(--correct);
+    color: #fff;
+  }
+
+  .choice-btn.wrong {
+    background: var(--wrong-bg) !important;
+    border-color: var(--wrong) !important;
+    color: #b71c1c !important;
+    font-weight: 700;
+  }
+
+  .choice-btn.wrong .choice-num {
+    background: var(--wrong);
+    color: #fff;
+  }
+
+  /* 結果＆復習画面 */
+  .score-card {
+    text-align: center;
+    padding: 24px 16px;
+    background: var(--primary-light);
+    border-radius: 14px;
+    margin-bottom: 24px;
+  }
+
+  .score-title {
+    font-size: 1rem;
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+
+  .score-num {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    margin: 8px 0;
+  }
+
+  .score-sub {
+    font-size: 0.9rem;
+    color: var(--text-sub);
+  }
+
+  .review-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .filter-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1.5px solid #cfd8dc;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-sub);
+  }
+
+  .filter-btn.active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .review-item {
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px;
+    background: #fff;
+  }
+
+  .review-item.is-wrong {
+    border-left: 6px solid var(--wrong);
+  }
+
+  .review-item.is-correct {
+    border-left: 6px solid var(--correct);
+  }
+
+  .review-q-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+  }
+
+  .status-tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+
+  .status-tag.ng {
+    background: var(--wrong-bg);
+    color: var(--wrong);
+  }
+
+  .status-tag.ok {
+    background: var(--correct-bg);
+    color: var(--correct);
+  }
+
+  .review-q-text {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .ans-box {
+    background: #f5f7f8;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  .ans-row {
+    margin: 4px 0;
+  }
+
+  .ans-row.user-ng {
+    color: var(--wrong);
+    font-weight: 700;
+  }
+
+  .ans-row.correct-ans {
+    color: var(--correct);
+    font-weight: 700;
+  }
+
+  .exp-box {
+    font-size: 0.9rem;
+    color: var(--text);
+    border-top: 1px dashed #cfd8dc;
+    padding-top: 10px;
+    margin-top: 8px;
+  }
+
+  .source-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--accent);
+    background: #e1f5fe;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .sub-btn {
+    flex: 1;
+    padding: 14px;
+    background: #eceff1;
+    color: var(--text);
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .sub-btn:hover {
+    background: #cfd8dc;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>生物と環境 試験対策フラッシュカード</h1>
+    <p>後期中間試験対策プリント（50問）＋ 授業プリント・資料（20問）</p>
+  </header>
+
+  <!-- 1. スタート・モード選択画面 -->
+  <div id="start-screen" class="screen active">
+    <div class="section-title">問題数モードを選択</div>
+    <div class="option-grid" id="count-options">
+      <button class="select-btn selected" data-count="10">10問モード<span>サクッと確認（対策7問＋授業3問）</span></button>
+      <button class="select-btn" data-count="30">30問モード<span>標準演習（対策21問＋授業9問）</span></button>
+      <button class="select-btn" data-count="60">60問モード<span>徹底演習（対策43問＋授業17問）</span></button>
+      <button class="select-btn" data-count="70">全問モード（70問）<span>対策50問＋授業20問すべて</span></button>
+    </div>
+
+    <div class="section-title">出題順を選択</div>
+    <div class="option-grid" id="order-options">
+      <button class="select-btn selected" data-random="true">ランダム出題<span>毎回シャッフルして出題</span></button>
+      <button class="select-btn" data-random="false">ランダム無し<span>プリントの問1から順番に出題</span></button>
+    </div>
+
+    <button class="start-btn" id="start-btn">クイズをスタート</button>
+  </div>
+
+  <!-- 2. クイズ画面 -->
+  <div id="quiz-screen" class="screen">
+    <div class="quiz-header">
+      <span id="q-counter">第 1 / 10 問</span>
+      <span class="badge" id="q-category">試験対策プリント</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="flashcard">
+      <div class="question-text" id="question-text">ここに問題文が表示されます</div>
+    </div>
+
+    <div class="choices-list" id="choices-list"></div>
+  </div>
+
+  <!-- 3. 結果・復習画面 -->
+  <div id="result-screen" class="screen">
+    <div class="score-card">
+      <div class="score-title">クイズ結果</div>
+      <div class="score-num" id="score-num">8 / 10</div>
+      <div class="score-sub" id="score-rate">正答率 80%</div>
+    </div>
+
+    <div class="section-title">問題の復習（解説と出典）</div>
+    <div class="review-filter">
+      <button class="filter-btn active" id="filter-wrong">間違えた問題のみ</button>
+      <button class="filter-btn" id="filter-all">全問題を表示</button>
+    </div>
+
+    <div class="review-list" id="review-list"></div>
+
+    <div class="btn-group">
+      <button class="sub-btn" id="retry-wrong-btn" style="display:none; background:#ffecb3; color:#e65100;">間違えた問題だけ再挑戦</button>
+      <button class="start-btn" id="back-home-btn" style="flex:1;">トップに戻る</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 全70問データ（試験対策プリント50問＝約71.4% ＋ 授業プリント・授業資料20問＝約28.6%）
+const ALL_QUESTIONS = [
+  // ================= 後期中間試験対策プリント（問1〜問50） =================
+  {
+    id: 1, type: "exam",
+    q: "問1：池の生物、水温、底の泥と、それらの関係を一体として調べた。調べた対象は何か。",
+    choices: ["生態系", "個体群", "バイオーム", "植生", "優占種"],
+    ans: "生態系",
+    exp: "ある環境における全ての生物的環境（バイオーム）と、それを取り巻く非生物的環境（水温・底の泥などの環境要因）を合わせた総体を「生態系」といいます。",
+    source: "後期中間試験対策プリント 1ページ 問1（第17回授業プリント・第17回授業資料）"
+  },
+  {
+    id: 2, type: "exam",
+    q: "問2：植物にとって非生物的な環境要因に当たるものはどれか。",
+    choices: ["土壌中の水分", "根に共生する菌", "葉を食べる昆虫", "落葉を分解する菌", "隣に生える樹木"],
+    ans: "土壌中の水分",
+    exp: "光・大気・土壌・気温・水（水分）などは「非生物的環境（環境要因）」に分類されます。他の菌や昆虫、樹木は「生物的環境」です。",
+    source: "後期中間試験対策プリント 1ページ 問2（第17回授業プリント・第17回授業資料）"
+  },
+  {
+    id: 3, type: "exam",
+    q: "問3：種名が分からない段階で、遠景から森林・草原・荒原を区別した。これは何に基づく分類か。",
+    choices: ["植生の相観", "植物の種構成", "樹種の優占度", "各種の被度", "植物の生活形"],
+    ans: "植生の相観",
+    exp: "植生の外観（全体の見た目）によって森林・草原・荒原などに分ける方法を「相観による分類」といいます。",
+    source: "後期中間試験対策プリント 1ページ 問3（第17回授業プリント・第17回授業資料）"
+  },
+  {
+    id: 4, type: "exam",
+    q: "問4：草本が光合成でつくった有機物を、草食昆虫が食べ、落葉は菌類が分解する。草本・昆虫・菌類の役割の順として正しいものはどれか。",
+    choices: ["生産者・消費者・分解者", "生産者・分解者・消費者", "分解者・消費者・生産者", "消費者・生産者・分解者", "消費者・分解者・生産者"],
+    ans: "生産者・消費者・分解者",
+    exp: "光合成で有機物をつくる植物（草本）は「生産者」、それを食べる動物（草食昆虫）は「消費者」、遺骸や落葉を分解する微生物・菌類は「分解者」です。",
+    source: "後期中間試験対策プリント 1ページ 問4（第17回授業プリント・第17回授業資料）"
+  },
+  {
+    id: 5, type: "exam",
+    q: "問5：「環境」の定義において、〇〇に入る語句は何か。『〇〇が認識し、〇〇に影響を与えるものを環境という。』",
+    choices: ["主体", "優占種", "生活形", "環境要因", "植生"],
+    ans: "主体",
+    exp: "環境（Environment）とは、「主体に影響を与え、主体が認識するもの」と定義されます。主体とは人間を含む生物個体や生物集団を指します。",
+    source: "後期中間試験対策プリント 1ページ 問5（第17回授業プリント・第17回授業資料）"
+  },
+  {
+    id: 6, type: "exam",
+    q: "問6：ある地域の環境に適応し、まとまりをなしている生物の集まりを表す用語はどれか。",
+    choices: ["バイオーム", "個体群", "優占種", "相観", "生態系"],
+    ans: "バイオーム",
+    exp: "ある地域の環境に適応した生物集団全体のことを「バイオーム（生物群系）」といいます（Bio＝生物 ＋ Ome＝全体）。",
+    source: "後期中間試験対策プリント 1ページ 問6（第17回授業プリント・第17回授業資料）"
+  },
+  {
+    id: 7, type: "exam",
+    q: "問7：森林の階層構造を上から順に並べたものはどれか。",
+    choices: [
+      "高木層→亜高木層→低木層→草本層",
+      "高木層→亜高木層→草本層→低木層",
+      "亜高木層→低木層→高木層→草本層",
+      "高木層→低木層→亜高木層→草本層",
+      "亜高木層→高木層→低木層→草本層"
+    ],
+    ans: "高木層→亜高木層→低木層→草本層",
+    exp: "森林の階層構造は、高い方から順に「高木層 → 亜高木層 → 低木層 → 草本層（→地表層）」と分かれています。",
+    source: "後期中間試験対策プリント 1ページ 問7（第19回授業プリント）"
+  },
+  {
+    id: 8, type: "exam",
+    q: "問8：高木の枝葉が光を遮り、林床が暗くなった。この関係を表すものはどれか。",
+    choices: [
+      "生物が環境に影響した",
+      "環境要因どうしが影響した",
+      "生物どうしが互いに影響した",
+      "環境が生物に影響した",
+      "環境が自ら変化した"
+    ],
+    ans: "生物が環境に影響した",
+    exp: "高木（生物）が光を遮ることで林床の光環境（非生物的環境）を暗く変化させているため、「生物が環境に影響した（環境形成作用）」にあたります。",
+    source: "後期中間試験対策プリント 1ページ 問8（第18回・第19回授業プリント）"
+  },
+  {
+    id: 9, type: "exam",
+    q: "問9：隣り合う二本の木が、互いの枝葉で相手に届く光を奪い合っている。この関係を表した語句は次のうちどれか。",
+    choices: ["相互作用", "生活形", "作用", "光合成", "環境形成作用"],
+    ans: "相互作用",
+    exp: "生物どうしが互いに影響しあうことを「相互作用」といいます（環境→生物は「作用」、生物→環境は「環境形成作用」）。",
+    source: "後期中間試験対策プリント 1ページ 問9（第19回授業プリント）"
+  },
+  {
+    id: 10, type: "exam",
+    q: "問10：葉が光合成に使い、呼吸で放出する気体はどれか。",
+    choices: ["二酸化炭素", "酸素", "窒素", "メタン", "水蒸気"],
+    ans: "二酸化炭素",
+    exp: "植物は光合成で「水＋二酸化炭素＋光エネルギー → 有機物＋酸素」をつくり、呼吸で「酸素＋有機物 → 二酸化炭素＋水＋エネルギー」を放出します。",
+    source: "後期中間試験対策プリント 1ページ 問10（第18回・第19回授業プリント）"
+  },
+  {
+    id: 11, type: "exam",
+    q: "問11：光合成による二酸化炭素吸収量が毎時8、呼吸による放出が毎時3だった。見かけの二酸化炭素吸収量は毎時いくらか。",
+    choices: ["5", "2.7", "11", "3", "8"],
+    ans: "5",
+    exp: "「見かけの光合成速度（二酸化炭素吸収量）＝ 実際の光合成速度(8) － 呼吸速度(3) ＝ 5」となります。",
+    source: "後期中間試験対策プリント 1ページ 問11（第18回授業プリント）"
+  },
+  {
+    id: 12, type: "exam",
+    q: "問12：ある植物の葉に、光補償点よりわずかに弱い光が当たっているとき、二酸化炭素の出入りはどうなるか。",
+    choices: [
+      "吸収量より放出量が多い",
+      "吸収量と放出量が等しい",
+      "吸収量がゼロで放出のみ",
+      "放出量より吸収量が多い",
+      "吸収量と放出量がともにゼロである"
+    ],
+    ans: "吸収量より放出量が多い",
+    exp: "光補償点ではCO2の吸収量と放出量が等しくなります。それより弱い光では、光合成による吸収量よりも呼吸による放出量の方が多くなります。",
+    source: "後期中間試験対策プリント 1ページ 問12（第18回・第19回授業プリント）"
+  },
+  {
+    id: 13, type: "exam",
+    q: "問13：同じ木の外側と内側で葉を比較した。日当たりのよい外側にできる陽葉の特徴はどれか。",
+    choices: [
+      "面積が小さく、厚い",
+      "面積が大きく、薄い",
+      "面積が大きく、厚い",
+      "面積は同程度で、薄い",
+      "面積が小さく、薄い"
+    ],
+    ans: "面積が小さく、厚い",
+    exp: "光がよく当たる陽葉は柵状組織が発達するため「面積が小さく、葉の厚さは厚い」のが特徴です。一方、陰葉は弱い光を効率よく受けるため「面積が大きく、薄い」特徴をもちます。",
+    source: "後期中間試験対策プリント 1ページ 問13（第19回授業プリント）"
+  },
+  {
+    id: 14, type: "exam",
+    q: "問14：光の強さが同じとき、弱光下で見かけの光合成速度が正になりやすい植物の特徴はどれか。",
+    choices: [
+      "光補償点が低い",
+      "光補償点が高い",
+      "光飽和点が高い",
+      "呼吸速度が高い",
+      "最大光合成速度が高い"
+    ],
+    ans: "光補償点が低い",
+    exp: "光補償点が低い（小さい）陰生植物は、呼吸速度が低く、わずかな光でも見かけの光合成速度が正（プラス）になりやすいため弱光下で生育できます。",
+    source: "後期中間試験対策プリント 1ページ 問14（第18回・第19回授業プリント）"
+  },
+  {
+    id: 15, type: "exam",
+    q: "問15：高木の枝葉がつくる森林上部の外表面と、地表付近の部分の組合せはどれか。",
+    choices: [
+      "林冠・林床",
+      "落葉層・林冠",
+      "林冠・草本層",
+      "高木層・草本層",
+      "高木層・落葉層"
+    ],
+    ans: "林冠・林床",
+    exp: "森林上部の高木の枝葉が茂り光を直接受ける外表面を「林冠（りんかん）」、森林の地表付近の部分を「林床（りんしょう）」といいます。",
+    source: "後期中間試験対策プリント 1ページ 問15（第19回授業資料）"
+  },
+  {
+    id: 16, type: "exam",
+    q: "問16：乾燥が続き、林床の草本の生育が悪くなった。この関係を表した語句は次のうちどれか。",
+    choices: ["作用", "相互作用", "植生遷移", "ギャップ更新", "環境形成作用"],
+    ans: "作用",
+    exp: "乾燥という非生物的環境（環境要因）が草本（生物）に影響を与えているため、「作用」にあたります。",
+    source: "後期中間試験対策プリント 1ページ 問16（第19回授業プリント）"
+  },
+  {
+    id: 17, type: "exam",
+    q: "問17：森林土壌の上部に黒褐色の腐植ができた。腐植のもととなる有機物は主に何から生じたか。",
+    choices: [
+      "落葉や落枝の分解",
+      "水や無機塩類の移動",
+      "母岩や礫の風化",
+      "粘土や砂粒の混合",
+      "砂や泥の堆積"
+    ],
+    ans: "落葉や落枝の分解",
+    exp: "地表に落ちた植物の落葉や落枝、生物の遺骸などが土壌動物や微生物によって分解されることで、黒褐色の有機物である「腐植」が生じます。",
+    source: "後期中間試験対策プリント 1ページ 問17（第18回・第19回授業資料）"
+  },
+  {
+    id: 18, type: "exam",
+    q: "問18：森林の土壌で「団粒構造」ができるしくみとして、最も適切なものを一つ選びなさい。",
+    choices: [
+      "腐植が、微生物に分解されることで生じる。",
+      "落葉や落枝が細かく砕かれ、一片ずつが土の粒状の塊になる。",
+      "岩石が風化し、一粒ずつが土の粒状の塊になる。",
+      "腐植が集まって粒状の塊になる。",
+      "土壌動物が土の中に通り道をつくり、その通り道が土の粒状の塊になる。"
+    ],
+    ans: "腐植が、微生物に分解されることで生じる。",
+    exp: "腐植が微生物に分解される過程で生じる物質や菌糸などの働きによって土の粒子が結びつき、通気性・保水性に優れた「団粒構造」が形成されます。",
+    source: "後期中間試験対策プリント 1ページ 問18（第18回・第19回授業資料）"
+  },
+  {
+    id: 19, type: "exam",
+    q: "問19：陽生植物は、陰生植物と比較したときにどのような特徴があるか。適するものを選べ。",
+    choices: [
+      "光補償点も光飽和点も高い",
+      "光補償点は同程度で、光飽和点が低い",
+      "光補償点も光飽和点も低い",
+      "光補償点は低く、光飽和点は高い",
+      "光補償点は高く、光飽和点は低い"
+    ],
+    ans: "光補償点も光飽和点も高い",
+    exp: "陽生植物は光補償点・光飽和点がともに大きく（高く）、日当たりの良い環境で高い光合成速度を示します。",
+    source: "後期中間試験対策プリント 2ページ 問19（第19回授業プリント）"
+  },
+  {
+    id: 20, type: "exam",
+    q: "問20：土壌のない裸地Aと、伐採後に土壌が残った林跡Bを比べる。Bで草本が早く定着しやすい理由はどれか。",
+    choices: [
+      "草本が残った土壌に根を張れるから。",
+      "地衣類が岩石の風化を進めるから。",
+      "低木が草本に先立って定着するから。",
+      "陽樹が育ち、地表に日陰をつくるから。",
+      "草本の枯れ葉が分解され、土壌ができるから。"
+    ],
+    ans: "草本が残った土壌に根を張れるから。",
+    exp: "伐採跡地などの二次遷移（B）では、すでに土壌や種子・地下茎が残っているため、草本がすぐに根を張って定着でき、一次遷移（A）よりも速く進みます。",
+    source: "後期中間試験対策プリント 2ページ 問20（第19回・第20回授業プリント）"
+  },
+  {
+    id: 21, type: "exam",
+    q: "問21：典型的な一次遷移の流れとして正しいものはどれか。",
+    choices: [
+      "草原→低木林→陽樹林→混交林",
+      "低木林→草原→陽樹林→混交林",
+      "草原→低木林→混交林→陽樹林",
+      "草原→陽樹林→低木林→混交林",
+      "低木林→草原→混交林→陽樹林"
+    ],
+    ans: "草原→低木林→陽樹林→混交林",
+    exp: "一次遷移は「裸地 → 地衣類・コケ植物 → 草原 → 低木林 → 陽樹林 → 混交林 → 陰樹林（極相林）」の順に進行します。",
+    source: "後期中間試験対策プリント 2ページ 問21（第20回授業プリント）"
+  },
+  {
+    id: 22, type: "exam",
+    q: "問22：裸地に地衣類やコケ類が定着した。後から草本が定着しやすくなる変化はどれか。",
+    choices: [
+      "岩の表面に土壌が形成される",
+      "岩の表面の湿度が上がる",
+      "土壌中の水分が減少する",
+      "乾燥によりコケ類が失われる",
+      "土壌から有機物が減少する"
+    ],
+    ans: "岩の表面に土壌が形成される",
+    exp: "先駆植物である地衣類やコケ類が定着し、岩石の風化や自身の遺骸の蓄積によって岩の表面に土壌が形成されるため、後から草本が根を張って定着しやすくなります。",
+    source: "後期中間試験対策プリント 2ページ 問22（第19回・第20回授業プリント）"
+  },
+  {
+    id: 23, type: "exam",
+    q: "問23：マメ科のオオバヤシャブシが、栄養の乏しい遷移の初期段階でも育ちやすい理由は、次のうちどれか。",
+    choices: [
+      "根の共生細菌が窒素固定を行う",
+      "根の共生細菌が光合成を行う",
+      "葉の共生細菌が窒素固定を行う",
+      "根の共生細菌が硝化を行う",
+      "葉の共生細菌が光合成を行う"
+    ],
+    ans: "根の共生細菌が窒素固定を行う",
+    exp: "オオバヤシャブシやマメ科植物の根には根粒菌（やフランキアなどの共生細菌）が共生しており、空気中の窒素から窒素化合物をつくる「窒素固定」を行うため、貧栄養の土壌でもよく育ちます。",
+    source: "後期中間試験対策プリント 2ページ 問23（第19回授業資料）"
+  },
+  {
+    id: 24, type: "exam",
+    q: "問24：陽樹林では、背の高い木の枝や葉が光をさえぎり、林内が薄暗くなる。それでも陰樹の若い木が育ち、やがて陽樹と陰樹が混じる森林になった。陰樹がこの林内で育つことができたのは、どのような特徴があるためか。",
+    choices: [
+      "弱い光の下でも育つ",
+      "強い光の下でよく育つ",
+      "乾燥した土でもよく育つ",
+      "土壌の少ない場所でも育つ",
+      "水分の多い土でよく育つ"
+    ],
+    ans: "弱い光の下でも育つ",
+    exp: "陰樹は光補償点が低く、薄暗い林床（弱い光の下）でも見かけの光合成速度をプラスに保って生育できるため、陽樹林の林床でも幼木が育ちます。",
+    source: "後期中間試験対策プリント 2ページ 問24（第19回・第20回授業プリント）"
+  },
+  {
+    id: 25, type: "exam",
+    q: "問25：湖が浅くなり、湿原へ移行した。この変化を直接進める過程はどれか。",
+    choices: [
+      "土砂や植物の遺骸がたまる",
+      "湖底から堆積物が流出する",
+      "底の土砂が外へ流れ出る",
+      "流入水が湖底を掘り下げる",
+      "湖底の有機物が減少する"
+    ],
+    ans: "土砂や植物の遺骸がたまる",
+    exp: "湿性遷移では、周囲からの土砂の流入や水生植物の遺骸が湖底に堆積することで湖がしだいに浅くなり、湿原へと移行します。",
+    source: "後期中間試験対策プリント 2ページ 問25（第19回・第20回授業資料）"
+  },
+  {
+    id: 26, type: "exam",
+    q: "問26：同じ森林内に、林冠のすき間（ギャップ）が大小二つできた。大きなギャップでは、小さなギャップに比べて、林床に届く光の強さと育ちやすい樹木はどうなるか。",
+    choices: [
+      "光が強く、陽樹が育ちやすい",
+      "光が強く、陰樹が育ちやすい",
+      "光が弱く、陽樹が育ちやすい",
+      "光が弱く、陰樹が育ちやすい",
+      "光の強さは同程度で、陽樹が育ちやすい"
+    ],
+    ans: "光が強く、陽樹が育ちやすい",
+    exp: "大きなギャップでは林床に強い光が届くため、強い光の下で成長が速い「陽樹」が育ちやすくなります（小さなギャップでは弱い光でも育つ陰樹がそのまま成長します）。",
+    source: "後期中間試験対策プリント 2ページ 問26（第19回授業プリント「ギャップ更新」）"
+  },
+  {
+    id: 27, type: "exam",
+    q: "問27：遷移の初期に裸地へ侵入する植物を何というか。",
+    choices: ["先駆植物", "着生植物", "沈水植物", "浮葉植物", "陰生植物"],
+    ans: "先駆植物",
+    exp: "遷移の初期段階に裸地へ真っ先に侵入・定着する地衣類やコケ類、ススキなどの植物を「先駆植物（パイオニア植物）」といいます。",
+    source: "後期中間試験対策プリント 2ページ 問27（第19回・第20回授業プリント）"
+  },
+  {
+    id: 28, type: "exam",
+    q: "問28：遷移が進み、植生の種構成が比較的安定した状態を何というか。",
+    choices: ["極相", "一次遷移", "ギャップ", "混交林", "裸地"],
+    ans: "極相",
+    exp: "遷移が進行し、陰樹林となって植生の種構成がそれ以上大きく変化しなくなった安定した状態を「極相（クライマックス）」といいます。",
+    source: "後期中間試験対策プリント 2ページ 問28（第20回授業プリント）"
+  },
+  {
+    id: 29, type: "exam",
+    q: "問29：森林に大きなギャップができたあと、森林全体の種の多様性が保たれやすくなる理由はどれか。",
+    choices: [
+      "明るさの異なる区画が増える",
+      "林床全体が乾燥する",
+      "森林全体で同じ樹種が優占する",
+      "森林全体の樹齢がそろう",
+      "林床全体の明るさが均一になる"
+    ],
+    ans: "明るさの異なる区画が増える",
+    exp: "倒木などでギャップができると、明るい場所（陽樹が育つ）と暗い場所（陰樹が育つ）のように明るさの異なる区画がモザイク状に生じるため、多様な種が共存しやすくなります。",
+    source: "後期中間試験対策プリント 2ページ 問29（第19回授業プリント「ギャップ更新」）"
+  },
+  {
+    id: 30, type: "exam",
+    q: "問30：気温が同程度の地域を、乾燥が弱い側から強い側へ並べる。植生の相観は一般にどの順で変わるか。",
+    choices: [
+      "森林→草原→荒原",
+      "草原→森林→荒原",
+      "荒原→草原→森林",
+      "森林→荒原→草原",
+      "草原→荒原→森林"
+    ],
+    ans: "森林→草原→荒原",
+    exp: "西アフリカの例のように気温が同程度の場合、降水量が多い（乾燥が弱い）方から少ない（乾燥が強い）方へ向かって「森林 → 草原 → 荒原」の順に変化します。",
+    source: "後期中間試験対策プリント 2ページ 問30（第21回授業資料）"
+  },
+  {
+    id: 31, type: "exam",
+    q: "問31：年間を通して高温多雨で、常緑広葉樹の巨木や着生植物が目立つ。どの森林が当てはまるか。",
+    choices: ["熱帯多雨林", "雨緑樹林", "夏緑樹林", "硬葉樹林", "針葉樹林"],
+    ans: "熱帯多雨林",
+    exp: "年間を通じて高温多雨の熱帯地域には、多層構造をなす常緑広葉樹の巨木やつる植物・着生植物が豊富な「熱帯多雨林」が成立します。",
+    source: "後期中間試験対策プリント 2ページ 問31（第20回・第21回授業プリント）"
+  },
+  {
+    id: 32, type: "exam",
+    q: "問32：雨季と乾季のある高温の地域で、雨季に葉をつけ、乾季に葉を落とす樹木が優占する。どの森林が当てはまるか。",
+    choices: ["雨緑樹林", "熱帯多雨林", "硬葉樹林", "夏緑樹林", "照葉樹林"],
+    ans: "雨緑樹林",
+    exp: "高温で雨季と乾季がはっきりしている地域では、乾季に乾燥を防ぐため落葉し、雨季に葉を茂らせる落葉広葉樹からなる「雨緑樹林」が分布します。",
+    source: "後期中間試験対策プリント 2ページ 問32（第20回・第21回授業プリント）"
+  },
+  {
+    id: 33, type: "exam",
+    q: "問33：夏に乾燥し、冬に雨が多い地域で、オリーブのような硬く小さい葉をもつ樹木が見られる。どの森林が当てはまるか。",
+    choices: ["硬葉樹林", "雨緑樹林", "照葉樹林", "夏緑樹林", "熱帯多雨林"],
+    ans: "硬葉樹林",
+    exp: "地中海沿岸など、夏に乾燥し冬に降雨が多い温帯地域には、夏の乾燥に耐えるため小さく厚く硬い葉をもつ常緑広葉樹（オリーブ、コルクガシなど）からなる「硬葉樹林」が見られます。",
+    source: "後期中間試験対策プリント 2ページ 問33（第21回授業プリント・第21回授業資料）"
+  },
+  {
+    id: 34, type: "exam",
+    q: "問34：乾季のある熱帯に、イネ科の草本が優占し、樹木がまばらな植生がある。どのバイオームか。",
+    choices: ["サバンナ", "ステップ", "雨緑樹林", "砂漠", "ツンドラ"],
+    ans: "サバンナ",
+    exp: "乾季のある熱帯・亜熱帯地域で、乾燥に強いイネ科草本が優占し、アカシアなどの樹木がまばらに生える草原を「サバンナ」といいます。",
+    source: "後期中間試験対策プリント 2ページ 問34（第21回授業プリント）"
+  },
+  {
+    id: 35, type: "exam",
+    q: "問35：降水量の少ない温帯の大陸内部に、イネ科の草本が優占し、樹木がほとんどない植生が広がる。どのバイオームか。",
+    choices: ["ステップ", "砂漠", "サバンナ", "ツンドラ", "針葉樹林"],
+    ans: "ステップ",
+    exp: "降水量が少ない温帯地域（大陸内陸部など）に成立し、イネ科草本が優占して樹木がほぼ生育しない温帯草原を「ステップ」といいます。",
+    source: "後期中間試験対策プリント 3ページ 問35（第21回授業プリント）"
+  },
+  {
+    id: 36, type: "exam",
+    q: "問36：砂漠とツンドラを比べたとき、植生が乏しくなる主な要因の組合せはどれか。",
+    choices: [
+      "砂漠は水不足、ツンドラは低温",
+      "砂漠は高温、ツンドラは水不足",
+      "砂漠は水不足、ツンドラは高温",
+      "砂漠は低温、ツンドラは高温",
+      "砂漠は低温、ツンドラは水不足"
+    ],
+    ans: "砂漠は水不足、ツンドラは低温",
+    exp: "同じ荒原のバイオームでも、砂漠は「極端な乾燥（水不足）」によって、ツンドラは「極端な低温（寒さ）」によって植物の生育が制限されています。",
+    source: "後期中間試験対策プリント 3ページ 問36（第21回授業プリント・第21回授業資料）"
+  },
+  {
+    id: 37, type: "exam",
+    q: "問37：シベリアのように冬が長く寒さが厳しい地域の森林で、優占しやすい樹種の組合せはどれか。",
+    choices: [
+      "モミ類・トウヒ類",
+      "ガジュマル・アコウ",
+      "ブナ類・ナラ類",
+      "シイ類・カシ類",
+      "オリーブ・ゲッケイジュ"
+    ],
+    ans: "モミ類・トウヒ類",
+    exp: "冬が長く寒さが厳しい亜寒帯（シベリアなど）の針葉樹林（タイガ）では、モミ属・トウヒ属・カラマツ属などの常緑（一部落葉）針葉樹が優占します。",
+    source: "後期中間試験対策プリント 3ページ 問37（第20回・第21回授業プリント）"
+  },
+  {
+    id: 38, type: "exam",
+    q: "問38：熱帯多雨林と亜熱帯多雨林を比べるとき、授業で扱った気候上の違いはどれか。",
+    choices: [
+      "亜熱帯では気温が下がる季節がある",
+      "亜熱帯では夏に乾き冬に多雨となる",
+      "亜熱帯では年間を通して乾燥が続く",
+      "熱帯では乾季の落葉が広く見られる",
+      "熱帯では強い寒さが続く季節がある"
+    ],
+    ans: "亜熱帯では気温が下がる季節がある",
+    exp: "授業プリントにある通り、熱帯多雨林は「年間を通じて高温多雨」であるのに対し、亜熱帯多雨林は「やや気温が低くなる（下がる）時期がある亜熱帯地域」に成立します。",
+    source: "後期中間試験対策プリント 3ページ 問38（第21回授業プリント）"
+  },
+  {
+    id: 39, type: "exam",
+    q: "問39：乾燥した砂漠の植物に見られる、サボテンなどの多肉植物の特徴として適切なのはどれか。",
+    choices: [
+      "茎や葉に水を蓄える",
+      "幹の先に大きな葉を広げる",
+      "葉を水面に浮かべる",
+      "葉を雨季に落とす",
+      "気根で樹上に付着する"
+    ],
+    ans: "茎や葉に水を蓄える",
+    exp: "砂漠に生育するサボテンなどの多肉植物は、葉をトゲに変えて蒸散を防ぎ、多肉化した茎や葉に水分を蓄えることで乾燥に適応しています。",
+    source: "後期中間試験対策プリント 3ページ 問39（第20回・第21回授業プリント）"
+  },
+  {
+    id: 40, type: "exam",
+    q: "問40：日本の低地で、南から北にかけて森林の種類が変化する主な理由はどれか。",
+    choices: [
+      "緯度により気温が変化する",
+      "標高により気温が変化する",
+      "標高により降水量が変化する",
+      "緯度により標高が変化する",
+      "緯度により風向が変化する"
+    ],
+    ans: "緯度により気温が変化する",
+    exp: "日本列島は降水量が全般に十分あるため、低地における南北のバイオームの変化（水平分布）は主に「緯度による年平均気温の変化」によって決まります。",
+    source: "後期中間試験対策プリント 3ページ 問40（第21回授業プリント・第21回授業資料）"
+  },
+  {
+    id: 41, type: "exam",
+    q: "問41：日本の低地に見られる代表的な森林を南から北へ並べたものはどれか。",
+    choices: [
+      "亜熱帯多雨林→照葉樹林→夏緑樹林→針葉樹林",
+      "照葉樹林→亜熱帯多雨林→夏緑樹林→針葉樹林",
+      "亜熱帯多雨林→夏緑樹林→照葉樹林→針葉樹林",
+      "照葉樹林→夏緑樹林→亜熱帯多雨林→針葉樹林",
+      "亜熱帯多雨林→照葉樹林→針葉樹林→夏緑樹林"
+    ],
+    ans: "亜熱帯多雨林→照葉樹林→夏緑樹林→針葉樹林",
+    exp: "日本の水平分布は、南（沖縄・奄美）から北（北海道）へ向かって「亜熱帯多雨林 → 照葉樹林（暖温帯） → 夏緑樹林（冷温帯） → 針葉樹林（亜寒帯）」の順に並びます。",
+    source: "後期中間試験対策プリント 3ページ 問41（第21回授業資料）"
+  },
+  {
+    id: 42, type: "exam",
+    q: "問42：冬に葉を落とすブナやミズナラが優占する森林はどれか。",
+    choices: ["夏緑樹林", "雨緑樹林", "針葉樹林", "硬葉樹林", "照葉樹林"],
+    ans: "夏緑樹林",
+    exp: "冷温帯に分布し、冬に落葉するブナやミズナラなどの落葉広葉樹が優占する森林は「夏緑樹林」です。",
+    source: "後期中間試験対策プリント 3ページ 問42（第18回・第21回授業プリント）"
+  },
+  {
+    id: 43, type: "exam",
+    q: "問43：沖縄の河口で、潮が満ちると水につかる場所にオヒルギやメヒルギが生えていた。この植生の特徴として最も適切なものを一つ選びなさい。",
+    choices: [
+      "海水が流れ込む水辺に、塩分に強い樹木が生育する。",
+      "淡水が流れ込む水辺に、低温に強い樹木が生育する。",
+      "海水が流れ込む水辺に、乾燥に強い樹木が生育する。",
+      "淡水が流れ込む水辺に、乾燥に強い樹木が生育する。",
+      "海水が流れ込む水辺に、低温に強い樹木が生育する。"
+    ],
+    ans: "海水が流れ込む水辺に、塩分に強い樹木が生育する。",
+    exp: "熱帯・亜熱帯の河口（汽水域）の潮間帯に成立するマングローブ林（オヒルギ・メヒルギなど）は、海水が流れ込む水辺で耐塩性（塩分に強い性質）や支柱根・呼吸根をもつのが特徴です。",
+    source: "後期中間試験対策プリント 3ページ 問43（第17回・第21回授業資料）"
+  },
+  {
+    id: 44, type: "exam",
+    q: "問44：本州中部の山で、低地から山頂へ向かって植生を調べた。標高帯の順として正しいものはどれか。",
+    choices: [
+      "丘陵帯→山地帯→亜高山帯→高山帯",
+      "山地帯→丘陵帯→亜高山帯→高山帯",
+      "丘陵帯→亜高山帯→山地帯→高山帯",
+      "丘陵帯→山地帯→高山帯→亜高山帯",
+      "丘陵帯→亜高山帯→高山帯→山地帯"
+    ],
+    ans: "丘陵帯→山地帯→亜高山帯→高山帯",
+    exp: "日本の垂直分布では、標高が上がるにつれて「丘陵帯（照葉樹林）→ 山地帯（夏緑樹林）→ 亜高山帯（針葉樹林）→ 高山帯（高山植物・ハイマツ低木林）」の順に変化します。",
+    source: "後期中間試験対策プリント 3ページ 問44（第21回授業資料）"
+  },
+  {
+    id: 45, type: "exam",
+    q: "問45：同じ山で、標高300 mのふもとの気温が20 ℃だった。標高1,300 mの地点の気温は、およそ何℃と見積もられるか。",
+    choices: ["14 ℃", "10 ℃", "17 ℃", "19 ℃", "26 ℃"],
+    ans: "14 ℃",
+    exp: "標高が100 m上がるごとに気温は約0.6 ℃（1,000 mで約6 ℃）低下します。標高差は 1,300 － 300 ＝ 1,000 m なので、20 ℃ － 6 ℃ ＝ 約14 ℃となります。",
+    source: "後期中間試験対策プリント 3ページ 問45（第21回授業プリント・第21回授業資料）"
+  },
+  {
+    id: 46, type: "exam",
+    q: "問46：高山帯で見られる植生として適切なものはどれか。",
+    choices: [
+      "ハイマツなどの低木群落",
+      "アカマツなどの二次林",
+      "ブナなどの落葉広葉樹林",
+      "オオシラビソなどの針葉樹林",
+      "スダジイなどの常緑広葉樹林"
+    ],
+    ans: "ハイマツなどの低木群落",
+    exp: "森林限界より上の高山帯では高木が育たず、ハイマツなどの低木群落や高山草原（お花畑）、風衝地の地衣類・コケ類が見られます（オオシラビソは亜高山帯、ブナは山地帯、スダジイは丘陵帯）。",
+    source: "後期中間試験対策プリント 3ページ 問46（第21回授業プリント・第21回授業資料）"
+  },
+  {
+    id: 47, type: "exam",
+    q: "問47：日本に森林のバイオームが広く成立する背景として、授業で扱った要因はどれか。",
+    choices: [
+      "多くの地域で降水量が比較的多い",
+      "各地で海岸と山頂の気温が近い",
+      "各地で同じ樹木が優占している",
+      "多くの地域で標高による気温差が小さい",
+      "多くの地域で冬の気温が高い"
+    ],
+    ans: "多くの地域で降水量が比較的多い",
+    exp: "日本は全国的に年間降水量が多い（一般に1,000 mm以上）ため、乾燥による草原や砂漠ができにくく、低地から亜高山帯まで広く森林のバイオームが成立します。",
+    source: "後期中間試験対策プリント 3ページ 問47（第21回授業プリント・第21回授業資料）"
+  },
+  {
+    id: 48, type: "exam",
+    q: "問48：亜高山帯の上部で連続した森林が途切れ、低木や草本を主体とする植生に移る境界を何というか。",
+    choices: ["森林限界", "垂直分布", "林床", "林冠", "山地帯"],
+    ans: "森林限界",
+    exp: "亜高山帯（針葉樹林）と高山帯（ハイマツ低木林や草本）の境界で、高木からなる森林が成立しなくなる限界線を「森林限界」といいます。",
+    source: "後期中間試験対策プリント 3ページ 問48（第21回授業プリント・第21回授業資料）"
+  },
+  {
+    id: 49, type: "exam",
+    q: "問49：高山の「お花畑」では、草本の花が短い期間にまとまって見られる。その理由として最も適切なものはどれか。",
+    choices: [
+      "雪が解けたあとに、多くの草本が開花するから。",
+      "雪が積もる前に、多くの草本が開花するから。",
+      "雪が残っている間に、多くの草本が開花するから。",
+      "雪解けから長い期間をかけて、草本が順に開花するから。",
+      "積雪の少ない冬に、多くの草本が開花するから。"
+    ],
+    ans: "雪が解けたあとに、多くの草本が開花するから。",
+    exp: "高山帯は低温で積雪期間が長く、植物が生育できる夏の期間が非常に短いため、雪解け後に一斉に草本が成長・開花して「お花畑」をつくります。",
+    source: "後期中間試験対策プリント 3ページ 問49（第21回授業プリント・第21回授業資料）"
+  },
+  {
+    id: 50, type: "exam",
+    q: "問50：本州中部の山地帯に見られる代表的な森林はどれか。",
+    choices: ["夏緑樹林", "照葉樹林", "雨緑樹林", "硬葉樹林", "針葉樹林"],
+    ans: "夏緑樹林",
+    exp: "本州中部の垂直分布では、丘陵帯に「照葉樹林」、山地帯にブナなどの「夏緑樹林」、亜高山帯に「針葉樹林」が分布します。",
+    source: "後期中間試験対策プリント 3ページ 問50（第21回授業資料）"
+  },
+
+  // ================= 授業プリント・授業資料 オリジナル問題（20問） =================
+  {
+    id: 51, type: "print",
+    q: "【授業プリント】生物の生活様式を反映した形態（すがた・形）のことを何というか。",
+    choices: ["生活形", "相観", "環境要因", "優占種", "生態系"],
+    ans: "生活形",
+    exp: "生活様式を反映した生物の形態（すがた）のことを「生活形」といいます。種が違っていても、似たような環境では同じような生活形を示すことが多いです。",
+    source: "第17回授業プリント / 第18回授業プリント"
+  },
+  {
+    id: 52, type: "print",
+    q: "【授業プリント】植生を「群落」によって分類するとき、ある範囲の植物のなかで最も占有面積（被度）が大きい種を何というか。",
+    choices: ["優占種", "先駆種", "固有種", "生産者", "標徴種"],
+    ans: "優占種",
+    exp: "ススキ群落やガジュマル群落のように、群落のなかで最も占有面積が大きい種を「優占種」といい、群落の名前になることが多いです。",
+    source: "第17回授業プリント / 第17回授業資料"
+  },
+  {
+    id: 53, type: "print",
+    q: "【授業プリント】バイオームを構成する生物のなかで、太陽光のエネルギーを有機物（化学エネルギー）に変換する「生産者」であり、かつ「移動できない」という特徴をもつため環境要因に大きく左右されるものはどれか。",
+    choices: ["植物", "草食動物", "肉食動物", "菌類", "土壌動物"],
+    ans: "植物",
+    exp: "植物は移動できないため、その地域の気温や降水量などの環境要因に大きく左右され、同時に生態系の「生産者」としてすべての動物の基盤となります。",
+    source: "第17回授業プリント / 第17回授業資料"
+  },
+  {
+    id: 54, type: "print",
+    q: "【授業資料】現在の生物の高次分類において有力とされている「3ドメイン説」の3つのドメインの組み合わせとして正しいものはどれか。",
+    choices: [
+      "細菌・古細菌・真核生物",
+      "動物・植物・菌類",
+      "生産者・消費者・分解者",
+      "原核生物・原生生物・真核生物",
+      "森林・草原・荒原"
+    ],
+    ans: "細菌・古細菌・真核生物",
+    exp: "現在の高次分類では、生物を「細菌（Bacteria）」「古細菌（Archaea）」「真核生物（Eukarya）」の3つに分ける3ドメイン説が有力です。",
+    source: "第17回授業資料（余談：生命の樹）"
+  },
+  {
+    id: 55, type: "print",
+    q: "【授業資料】生物の分類階級を上位（大きい括り）から下位（小さい括り）へ並べたとき、「界・門・綱・目・科・属・種」の『界』のひとつ上に位置する階級はどれか。",
+    choices: ["ドメイン", "バイオーム", "群落", "個体群", "相観"],
+    ans: "ドメイン",
+    exp: "分類階級は上から「（生物）→ ドメイン → 界 → 門 → 綱 → 目 → 科 → 属 → 種」の順になります。",
+    source: "第17回授業資料（余談：生命の樹）"
+  },
+  {
+    id: 56, type: "print",
+    q: "【授業プリント】本州南部から南西諸島までの暖温帯・亜熱帯地域に分布する「照葉樹林」を構成する樹木の特徴として正しいものはどれか。",
+    choices: [
+      "クチクラ層が厚い常緑広葉樹",
+      "冬に葉を落とす落葉広葉樹",
+      "乾季に葉を落とす落葉広葉樹",
+      "寒さや乾燥に強い常緑針葉樹",
+      "茎に水を蓄える多肉植物"
+    ],
+    ans: "クチクラ層が厚い常緑広葉樹",
+    exp: "照葉樹林は、葉の表面のクチクラ層が厚く光沢がある「常緑広葉樹（シイ・カシ・クスノキなど）」からなる森林です。",
+    source: "第18回授業プリント"
+  },
+  {
+    id: 57, type: "print",
+    q: "【授業プリント】同じ植物体のなかで、光があまり当たらない内側にできる「陰葉」の特徴として正しいものはどれか。",
+    choices: [
+      "面積が大きく、葉の厚さは薄い",
+      "面積が小さく、葉の厚さは厚い",
+      "面積が大きく、葉の厚さは厚い",
+      "面積が小さく、葉の厚さは薄い",
+      "気孔が全くなく、クチクラ層が極めて厚い"
+    ],
+    ans: "面積が大きく、葉の厚さは薄い",
+    exp: "陰葉は弱い光を効率よく受け止めるために「面積が大きく」、呼吸による消費を抑えるため「葉の厚さは薄い」という特徴があります。",
+    source: "第19回授業プリント"
+  },
+  {
+    id: 58, type: "print",
+    q: "【授業プリント】光補償点・光飽和点が小さく、光があまり当たらない林床などの環境でも生育できる植物を何というか。",
+    choices: ["陰生植物（陰樹）", "陽生植物（陽樹）", "先駆植物", "多肉植物", "塩生植物"],
+    ans: "陰生植物（陰樹）",
+    exp: "光補償点・光飽和点が小さく、弱光下でも生育できる植物を「陰生植物（樹木では陰樹）」といいます。",
+    source: "第19回授業プリント"
+  },
+  {
+    id: 59, type: "print",
+    q: "【授業プリント】植物の「呼吸」の反応式として正しいものはどれか。",
+    choices: [
+      "酸素＋養分（有機物） → 二酸化炭素＋水＋エネルギー",
+      "水＋二酸化炭素＋光エネルギー → 養分（有機物）＋酸素",
+      "窒素＋水＋光エネルギー → アンモニア＋酸素",
+      "二酸化炭素＋酸素 → 養分（有機物）＋水",
+      "水＋酸素＋エネルギー → 二酸化炭素＋養分（有機物）"
+    ],
+    ans: "酸素＋養分（有機物） → 二酸化炭素＋水＋エネルギー",
+    exp: "呼吸は「酸素＋養分（有機物）→ 二酸化炭素＋水＋エネルギー」、光合成は「水＋二酸化炭素＋光エネルギー → 養分（有機物）＋酸素」です。",
+    source: "第19回授業プリント"
+  },
+  {
+    id: 60, type: "print",
+    q: "【授業プリント】一次遷移の流れにおいて、「裸地 → 草原 → 低木林 → 陽樹林 → 混交林」の次に成立する極相林はどれか。",
+    choices: ["陰樹林", "夏緑樹林", "サバンナ", "ステップ", "荒原"],
+    ans: "陰樹林",
+    exp: "一次遷移では、混交林のあとに陰樹が優占する「陰樹林（＝極相林）」へと至ります。",
+    source: "第20回授業プリント"
+  },
+  {
+    id: 61, type: "print",
+    q: "【授業プリント】伊豆大島などの植生遷移において、荒原から陰樹林へと遷移が進行するにつれて起こる「非生物的環境の変化」として正しいものはどれか。",
+    choices: [
+      "植生の高さが高くなり、地表に届く光の強さは弱くなり、土壌の厚みや有機物量は増加する",
+      "植生の高さが低くなり、地表に届く光の強さは強くなり、土壌の有機物量は減少する",
+      "植生の高さが高くなり、地表に届く光の強さも強くなり、土壌は薄くなる",
+      "植生の高さは変わらず、地表に届く光の強さだけが強くなる",
+      "土壌の厚みは減少するが、地表に届く光の強さは弱くなる"
+    ],
+    ans: "植生の高さが高くなり、地表に届く光の強さは弱くなり、土壌の厚みや有機物量は増加する",
+    exp: "遷移が進むにつれ、植物の背丈（高さ）は高くなり、枝葉に遮られて地表付近の光は弱くなります。一方、落葉などの蓄積により土壌の厚みや有機物量（腐植・水分）は増加していきます。",
+    source: "第20回授業プリント"
+  },
+  {
+    id: 62, type: "print",
+    q: "【授業プリント】自然環境において、台風や山火事、森林伐採など、植生を破壊し生物の変化を生じさせるような環境変化イベントを何というか。",
+    choices: ["撹乱（かくらん）", "極相（クライマックス）", "相観", "窒素固定", "団粒構造"],
+    ans: "撹乱（かくらん）",
+    exp: "生物の変化を生じさせるような環境変化イベントを「撹乱（かくらん）」といいます。撹乱によって森林が破壊されると、そのあとから二次遷移が進行します。",
+    source: "第20回授業プリント"
+  },
+  {
+    id: 63, type: "print",
+    q: "【授業プリント】環境の撹乱（かくらん）のうち、台風や山火事、火山噴火など自然によるものと、森林伐採や焼畑など人間が関与するものの呼び方の組み合わせとして正しいものはどれか。",
+    choices: [
+      "自然撹乱・人為撹乱",
+      "一次撹乱・二次撹乱",
+      "陽生撹乱・陰生撹乱",
+      "物理撹乱・生物撹乱",
+      "極相撹乱・遷移撹乱"
+    ],
+    ans: "自然撹乱・人為撹乱",
+    exp: "台風や山火事など自然によるものを「自然撹乱」、森林伐採や焼畑など人間が関与するものを「人為撹乱」といいます。",
+    source: "第20回授業プリント"
+  },
+  {
+    id: 64, type: "print",
+    q: "【授業資料】西アフリカではどの地域も年平均気温が20℃以上であるが、赤道付近から北へ向かって「森林 → 草原（サバンナ）→ 荒原（砂漠）」とバイオームが変化する。この分布を決める主な要因はどれか。",
+    choices: ["年降水量", "年平均気温", "標高の高さ", "土壌の母岩の種類", "海流の向き"],
+    ans: "年降水量",
+    exp: "西アフリカでは年平均気温がいずれも20℃以上と高い一方、南北で「年降水量」が大きく異なるため、降水量の違いがバイオームを決定づけています。",
+    source: "第21回授業資料"
+  },
+  {
+    id: 65, type: "print",
+    q: "【授業資料】北アメリカ（カナダ北部など）では、年間降水量の差が小さい一方、高緯度に向かうにつれて「森林（針葉樹林）→ 荒原（ツンドラ）」へと変化する。この分布を決める主な要因はどれか。",
+    choices: ["年平均気温", "年降水量", "土壌の塩分濃度", "山火事の頻度", "乾燥季節風"],
+    ans: "年平均気温",
+    exp: "北アメリカ高緯度地域では年間降水量の差が小さい一方、高緯度ほど「年平均気温」が大きく低下するため、気温がバイオームを決定づけています。",
+    source: "第21回授業資料"
+  },
+  {
+    id: 66, type: "print",
+    q: "【授業プリント】冬に乾燥し、夏に降水量が多い暖温帯地域（日本南部など）に成立する常緑広葉樹林はどれか。",
+    choices: ["照葉樹林", "硬葉樹林", "雨緑樹林", "夏緑樹林", "針葉樹林"],
+    ans: "照葉樹林",
+    exp: "同じ温帯の常緑広葉樹林でも、夏に乾燥し冬に雨が多い地中海沿岸などには「硬葉樹林」が、冬に乾燥（または低温）し夏に降水量が多い地域には「照葉樹林」が成立します。",
+    source: "第21回授業プリント"
+  },
+  {
+    id: 67, type: "print",
+    q: "【授業プリント】気温が非常に低い寒帯地域に分布し、樹木がほとんど生育せず、地衣類やコケ類（苔類）が優占する荒原のバイオームはどれか。",
+    choices: ["ツンドラ", "砂漠", "ステップ", "サバンナ", "タイガ"],
+    ans: "ツンドラ",
+    exp: "年平均気温が氷点下になるような極寒の地域では、森林限界を超えて樹木が育たず、短い夏に地衣類やコケ類、草本が生育する「ツンドラ」となります。",
+    source: "第21回授業プリント"
+  },
+  {
+    id: 68, type: "print",
+    q: "【授業資料】日本のバイオームの分布において、沖縄島や奄美大島などの「亜熱帯」に成立する森林バイオームはどれか。",
+    choices: ["亜熱帯多雨林", "熱帯多雨林", "硬葉樹林", "夏緑樹林", "針葉樹林"],
+    ans: "亜熱帯多雨林",
+    exp: "沖縄島や奄美大島などの南西諸島（亜熱帯）には、ガジュマルやアコウ、ヘゴなどが生育する「亜熱帯多雨林」が分布しています。",
+    source: "第21回授業資料"
+  },
+  {
+    id: 69, type: "print",
+    q: "【授業資料】日本の垂直分布の図において、北海道（大雪山・利尻岳など）の低地〜山麓に広く分布している森林バイオームはどれか。",
+    choices: ["針葉樹林（一部夏緑樹林）", "照葉樹林", "亜熱帯多雨林", "硬葉樹林", "雨緑樹林"],
+    ans: "針葉樹林（一部夏緑樹林）",
+    exp: "高緯度に位置する北海道では、本州の亜高山帯に相当する「針葉樹林」や山地帯に相当する「夏緑樹林」が低い標高から分布しています。",
+    source: "第17回授業プリント / 第21回授業資料"
+  },
+  {
+    id: 70, type: "print",
+    q: "【授業資料】縦軸に「年降水量」、横軸に「年平均気温」をとった世界のバイオームのグラフにおいて、年平均気温が20〜30℃と高く、年降水量が2,500〜4,500mmと最も多い領域に位置するバイオームはどれか。",
+    choices: ["熱帯多雨林", "雨緑樹林", "サバンナ", "照葉樹林", "ツンドラ"],
+    ans: "熱帯多雨林",
+    exp: "気温・降水量グラフの右上端（最も高温かつ多雨の領域）には「熱帯多雨林」が位置し、同じ高温域でも降水量が減るにつれて「雨緑樹林 → サバンナ → 砂漠」へと移り変わります。",
+    source: "第20回授業資料 / 第21回授業資料"
+  }
+];
+
+// 状態管理
+let selectedCount = 10;
+let isRandomOrder = true;
+let currentQuizList = [];
+let currentIndex = 0;
+let userLogs = [];
+let isLocked = false;
+let currentFilter = "wrong";
+
+// 要素の取得
+const startScreen = document.getElementById("start-screen");
+const quizScreen = document.getElementById("quiz-screen");
+const resultScreen = document.getElementById("result-screen");
+
+// モードボタンのイベント設定
+document.querySelectorAll("#count-options .select-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#count-options .select-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedCount = parseInt(btn.dataset.count, 10);
+  });
+});
+
+document.querySelectorAll("#order-options .select-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#order-options .select-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    isRandomOrder = btn.dataset.random === "true";
+  });
+});
+
+// 配列シャッフル関数
+function shuffleArray(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+// 問題リストの作成（常に試験対策PDFから約7割出題）
+function buildQuizList(count, randomFlag) {
+  const examQuestions = ALL_QUESTIONS.filter(q => q.type === "exam"); // 50問
+  const printQuestions = ALL_QUESTIONS.filter(q => q.type === "print"); // 20問
+
+  if (count >= ALL_QUESTIONS.length) {
+    // 全問モード（70問：対策50問＝71.4%、授業20問＝28.6%）
+    const all = [...examQuestions, ...printQuestions];
+    return randomFlag ? shuffleArray(all) : all;
+  }
+
+  // 約7割を試験対策プリントから、残り約3割を授業プリントから抽出
+  let examTarget = Math.round(count * 0.7);
+  if (examTarget > examQuestions.length) examTarget = examQuestions.length;
+  let printTarget = count - examTarget;
+  if (printTarget > printQuestions.length) {
+    printTarget = printQuestions.length;
+    examTarget = count - printTarget;
+  }
+
+  if (randomFlag) {
+    const pickedExam = shuffleArray(examQuestions).slice(0, examTarget);
+    const pickedPrint = shuffleArray(printQuestions).slice(0, printTarget);
+    return shuffleArray([...pickedExam, ...pickedPrint]);
+  } else {
+    // ランダム無し：問1から順番に指定数を取得
+    const pickedExam = examQuestions.slice(0, examTarget);
+    const pickedPrint = printQuestions.slice(0, printTarget);
+    return [...pickedExam, ...pickedPrint];
+  }
+}
+
+// クイズ開始
+document.getElementById("start-btn").addEventListener("click", () => {
+  currentQuizList = buildQuizList(selectedCount, isRandomOrder);
+  startQuizSession(currentQuizList);
+});
+
+function startQuizSession(list) {
+  currentIndex = 0;
+  userLogs = [];
+  isLocked = false;
+  startScreen.classList.remove("active");
+  resultScreen.classList.remove("active");
+  quizScreen.classList.add("active");
+  renderQuestion();
+}
+
+// 問題の描画
+function renderQuestion() {
+  isLocked = false;
+  const qData = currentQuizList[currentIndex];
+  const total = currentQuizList.length;
+
+  document.getElementById("q-counter").textContent = `第 ${currentIndex + 1} / ${total} 問`;
+  const badge = document.getElementById("q-category");
+  if (qData.type === "exam") {
+    badge.textContent = "試験対策プリント";
+    badge.style.background = "#e8f5e9";
+    badge.style.color = "#1b5e20";
+  } else {
+    badge.textContent = "授業プリント・資料";
+    badge.style.background = "#e1f5fe";
+    badge.style.color = "#01579b";
+  }
+
+  const progressPercent = ((currentIndex) / total) * 100;
+  document.getElementById("progress-fill").style.width = `${progressPercent}%`;
+
+  document.getElementById("question-text").textContent = qData.q;
+
+  // 5つの選択肢を毎回ランダムにシャッフル
+  const shuffledChoices = shuffleArray(qData.choices);
+  const choicesContainer = document.getElementById("choices-list");
+  choicesContainer.innerHTML = "";
+
+  const labels = ["①", "②", "③", "④", "⑤"];
+  shuffledChoices.forEach((choiceText, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = `<span class="choice-num">${labels[idx]}</span><span>${choiceText}</span>`;
+    btn.addEventListener("click", () => handleAnswer(btn, choiceText, qData));
+    choicesContainer.appendChild(btn);
+  });
+}
+
+// 回答時の処理（0.5秒待って自動的に次の問題へ）
+function handleAnswer(selectedBtn, chosenText, qData) {
+  if (isLocked) return;
+  isLocked = true;
+
+  const isCorrect = (chosenText === qData.ans);
+  const allButtons = document.querySelectorAll("#choices-list .choice-btn");
+
+  allButtons.forEach(btn => {
+    btn.disabled = true;
+    const text = btn.querySelector("span:last-child").textContent;
+    if (text === qData.ans) {
+      btn.classList.add("correct");
+    }
+  });
+
+  if (!isCorrect) {
+    selectedBtn.classList.add("wrong");
+  }
+
+  // 履歴を保存
+  userLogs.push({
+    qData: qData,
+    userAns: chosenText,
+    isCorrect: isCorrect
+  });
+
+  // プログレスバー更新
+  const total = currentQuizList.length;
+  document.getElementById("progress-fill").style.width = `${((currentIndex + 1) / total) * 100}%`;
+
+  // 0.5秒（500ミリ秒）待って自動的に次の問題へ遷移
+  setTimeout(() => {
+    currentIndex++;
+    if (currentIndex < currentQuizList.length) {
+      renderQuestion();
+    } else {
+      showResultScreen();
+    }
+  }, 500);
+}
+
+// 結果・復習画面の表示
+function showResultScreen() {
+  quizScreen.classList.remove("active");
+  resultScreen.classList.add("active");
+
+  const total = userLogs.length;
+  const correctCount = userLogs.filter(log => log.isCorrect).length;
+  const wrongCount = total - correctCount;
+  const rate = Math.round((correctCount / total) * 100);
+
+  document.getElementById("score-num").textContent = `${correctCount} / ${total}`;
+  document.getElementById("score-rate").textContent = `正答率 ${rate}%（正解 ${correctCount}問 / 不正解 ${wrongCount}問）`;
+
+  const retryWrongBtn = document.getElementById("retry-wrong-btn");
+  if (wrongCount > 0) {
+    retryWrongBtn.style.display = "block";
+    currentFilter = "wrong";
+    document.getElementById("filter-wrong").classList.add("active");
+    document.getElementById("filter-all").classList.remove("active");
+  } else {
+    retryWrongBtn.style.display = "none";
+    currentFilter = "all";
+    document.getElementById("filter-wrong").classList.remove("active");
+    document.getElementById("filter-all").classList.add("active");
+  }
+
+  renderReviewList();
+}
+
+// 復習リストの描画
+function renderReviewList() {
+  const container = document.getElementById("review-list");
+  container.innerHTML = "";
+
+  const targetLogs = currentFilter === "wrong"
+    ? userLogs.filter(log => !log.isCorrect)
+    : userLogs;
+
+  if (targetLogs.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:24px; color:#2e7d32; font-weight:700;">🎉 間違えた問題はありません！全問正解です！「全問題を表示」からすべての解説を確認できます。</div>`;
+    return;
+  }
+
+  targetLogs.forEach((log, idx) => {
+    const item = document.createElement("div");
+    item.className = `review-item ${log.isCorrect ? "is-correct" : "is-wrong"}`;
+
+    item.innerHTML = `
+      <div class="review-q-head">
+        <span class="status-tag ${log.isCorrect ? "ok" : "ng"}">${log.isCorrect ? "〇 正解" : "× 不正解"}</span>
+        <span style="color:#546e7a; font-weight:700;">問題ID: #${log.qData.id}</span>
+      </div>
+      <div class="review-q-text">${log.qData.q}</div>
+      <div class="ans-box">
+        <div class="ans-row ${log.isCorrect ? "correct-ans" : "user-ng"}">あなたの解答：${log.userAns}</div>
+        ${!log.isCorrect ? `<div class="ans-row correct-ans">正解：${log.qData.ans}</div>` : ""}
+      </div>
+      <div class="exp-box">
+        <strong>【解説】</strong><br>${log.qData.exp}<br>
+        <span class="source-tag">出典：${log.qData.source}</span>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+// フィルター切り替え
+document.getElementById("filter-wrong").addEventListener("click", () => {
+  currentFilter = "wrong";
+  document.getElementById("filter-wrong").classList.add("active");
+  document.getElementById("filter-all").classList.remove("active");
+  renderReviewList();
+});
+
+document.getElementById("filter-all").addEventListener("click", () => {
+  currentFilter = "all";
+  document.getElementById("filter-all").classList.add("active");
+  document.getElementById("filter-wrong").classList.remove("active");
+  renderReviewList();
+});
+
+// 間違えた問題だけ再挑戦
+document.getElementById("retry-wrong-btn").addEventListener("click", () => {
+  const wrongQuestions = userLogs.filter(log => !log.isCorrect).map(log => log.qData);
+  currentQuizList = isRandomOrder ? shuffleArray(wrongQuestions) : wrongQuestions;
+  startQuizSession(currentQuizList);
+});
+
+// トップに戻る
+document.getElementById("back-home-btn").addEventListener("click", () => {
+  resultScreen.classList.remove("active");
+  startScreen.classList.add("active");
+});
+</script>
+</body>
+</html>
